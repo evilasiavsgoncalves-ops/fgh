@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>P&aacute;gina N&atilde;o Encontrada &mdash; Talia Flores Est&eacute;tica</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              700: '#a13a3a',
+              800: '#863233'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .font-serif-title { font-family: 'Playfair Display', serif; }
+  </style>
+</head>
+<body class="bg-neutral-50 text-neutral-800 min-h-screen flex flex-col justify-between antialiased">
+  
+  <header class="bg-white border-b border-neutral-200 py-5">
+    <div class="max-w-4xl mx-auto px-4 flex justify-between items-center">
+      <a href="index.html" class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-gradient-to-tr from-brand-700 to-rose-400 rounded-full flex items-center justify-center text-white text-base shadow-sm">
+          <i class="fa-solid fa-spa"></i>
+        </div>
+        <div>
+          <span class="text-xl font-bold font-serif-title text-neutral-900 leading-tight block">Talia Flores</span>
+          <span class="text-[10px] font-semibold text-brand-700 uppercase tracking-wider">Est&eacute;tica &amp; Cuidados com a Beleza</span>
+        </div>
+      </a>
+      <a href="index.html" class="text-xs sm:text-sm font-semibold text-neutral-600 hover:text-brand-700 transition flex items-center gap-1.5">
+        <i class="fa-solid fa-arrow-left"></i> Voltar ao In&iacute;cio
+      </a>
+    </div>
+  </header>
+
+  <main class="max-w-xl mx-auto px-4 py-16 text-center">
+    <div class="bg-white rounded-3xl p-8 sm:p-12 shadow-sm border border-neutral-200">
+      <div class="w-16 h-16 mx-auto rounded-full bg-rose-50 text-brand-700 flex items-center justify-center text-2xl mb-4">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <h1 class="text-4xl font-extrabold text-neutral-900 font-serif-title mb-2">404</h1>
+      <h2 class="text-lg font-bold text-neutral-800 mb-3">P&aacute;gina n&atilde;o encontrada</h2>
+      <p class="text-neutral-600 text-xs sm:text-sm leading-relaxed mb-6">
+        O link que voc&ecirc; tentou acessar pode ter sido movido ou n&atilde;o est&aacute; mais dispon&iacute;vel. Clique no bot&atilde;o abaixo para retornar &agrave; p&aacute;gina inicial.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <a href="index.html" class="inline-flex justify-center items-center gap-2 bg-brand-700 hover:bg-brand-800 text-white font-bold px-6 py-3 rounded-xl transition text-xs sm:text-sm">
+          <i class="fa-solid fa-house"></i> Retornar ao In&iacute;cio
+        </a>
+        <a href="https://api.whatsapp.com/send?phone=5554991503991" target="_blank" class="inline-flex justify-center items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl transition text-xs sm:text-sm">
+          <i class="fa-brands fa-whatsapp"></i> Falar no WhatsApp
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-neutral-900 text-neutral-400 py-6 text-center text-xs border-t border-neutral-800">
+    <p>&copy; 2026 68.413.100 Talia Mendonca Flores &bull; CNPJ: 68.413.100/0001-83</p>
+  </footer>
+
+</body>
+</html>

