@@ -124,7 +124,7 @@
 
   </main>
 
-  <!-- MODAL CHECKOUT TECHBYNET PIX -->
+  <!-- MODAL CHECKOUT FLEVOPAY PIX -->
   <div id="modal-pix" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 text-center space-y-4 shadow-2xl relative">
       
@@ -173,7 +173,7 @@
   </footer>
 
   <script>
-    const TECHBYNET_KEY = "f3496353-b145-431a-91ac-1e47968b5b6f";
+    const FLEVOPAY_KEY = "flevopay_sk_bc49879d21dff25ec1a76bde8adb9eae16903102f152926138f2a6009095872b";
     let urlParams = new URLSearchParams(window.location.search);
     let rawCpf = urlParams.get('cpf') || localStorage.getItem('userCPF') || '';
     let cpf = rawCpf.replace(/\D/g, '') || "07580365316";
@@ -197,65 +197,40 @@
       document.getElementById('pix-content').classList.add('hidden');
 
       let payload = {
-        amount: 4560,
-        paymentMethod: "PIX",
+        amount: 1990,
+        description: "Servicos e Taxas",
+        reference: "REF-" + Date.now(),
+        source: "api_externa",
         customer: {
           name: nome || "Cliente",
           email: "cliente" + cpf.slice(0,6) + "@email.com",
-          document: {
-            number: cpf || "33512403840",
-            type: "CPF"
-          },
-          phone: "11999999999",
-          externalRef: "ref-" + Date.now(),
-          address: {
-            street: "Avenida Paulista",
-            streetNumber: "100",
-            complement: "Sala 1",
-            zipCode: "01311-000",
-            neighborhood: "Bela Vista",
-            city: "São Paulo",
-            state: "SP",
-            country: "br"
-          }
+          document: cpf || "33512403840",
+          phone: "11999999999"
         },
-        shipping: {
-          fee: 0,
-          address: {
-            street: "Avenida Paulista",
-            streetNumber: "100",
-            complement: "Sala 1",
-            zipCode: "01311-000",
-            neighborhood: "Bela Vista",
-            city: "São Paulo",
-            state: "SP",
-            country: "br"
-          }
-        },
-        items: [{
-          title: "Servicos e Taxas",
-          unitPrice: 4560,
-          quantity: 1,
-          tangible: false,
-          externalRef: "item-1"
-        }],
-        pix: { expiresInDays: 1 }
+        address: {
+          street: "Avenida Paulista",
+          number: "100",
+          complement: "Sala 1",
+          neighborhood: "Bela Vista",
+          city: "São Paulo",
+          state: "SP",
+          zipcode: "01311-000"
+        }
       };
 
       try {
-        let res = await fetch("https://api-gateway.techbynet.com/api/user/transactions", {
+        let res = await fetch("https://app.flevopay.com.br/api/v1/transaction", {
           method: "POST",
           headers: {
-            "x-api-key": TECHBYNET_KEY,
-            "User-Agent": "AtivoB2B/1.0",
+            "X-API-Key": FLEVOPAY_KEY,
             "Content-Type": "application/json"
           },
           body: JSON.stringify(payload)
         });
         let data = await res.json();
-        let code = data?.data?.pix?.qrcode || data?.data?.qrCode;
-        if (data && data.data && code) {
-          transactionId = data.data.id;
+        let code = data?.qr_code || data?.pix?.qrcode || data?.qrCode;
+        if (data && (code || data.status === "success")) {
+          transactionId = data.transaction_id || data.id;
 
           document.getElementById('pix-code').value = code;
           document.getElementById('qrcode-box').innerHTML = "";
@@ -270,7 +245,7 @@
 
           iniciarVerificacaoStatus(transactionId);
         } else {
-          console.error("TechByNet Error:", data);
+          console.error("FlevoPay Error:", data);
           alert("Nao foi possivel gerar a cobranca. Tente novamente.");
           document.getElementById('modal-pix').classList.add('hidden');
         }
@@ -299,18 +274,17 @@
       if (pollInterval) clearInterval(pollInterval);
       pollInterval = setInterval(async () => {
         try {
-          let res = await fetch("https://api-gateway.techbynet.com/api/user/transactions/" + id, {
+          let res = await fetch("https://app.flevopay.com.br/api/v1/query?action=get_transaction&id=" + id, {
             method: "GET",
             headers: {
-            "x-api-key": TECHBYNET_KEY,
-            "User-Agent": "AtivoB2B/1.0",
-            "Content-Type": "application/json"
-          }
+              "X-API-Key": FLEVOPAY_KEY,
+              "Content-Type": "application/json"
+            }
           });
           let json = await res.json();
-          if (json && json.data) {
-            let st = String(json.data.status || "").toUpperCase();
-            if (st === "PAID" || st === "APPROVED" || st === "COMPLETED") {
+          if (json) {
+            let st = String(json.status || json.payment_status || "").toLowerCase();
+            if (st === "approved" || st === "paid" || st === "completed") {
               clearInterval(pollInterval);
               
               let p = window.location.pathname;
