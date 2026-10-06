@@ -176,6 +176,72 @@
   </footer>
 
   <script>
+        const UTMIFY_TOKEN = "4FXxt7detgdLRz0HO72VbYr9WTXyOgXnW2qB";
+    function getUtmParams() {
+      try {
+        let p = new URLSearchParams(window.location.search);
+        return {
+          src: p.get('src') || localStorage.getItem('src') || null,
+          sck: p.get('sck') || localStorage.getItem('sck') || null,
+          utm_source: p.get('utm_source') || localStorage.getItem('utm_source') || null,
+          utm_campaign: p.get('utm_campaign') || localStorage.getItem('utm_campaign') || null,
+          utm_medium: p.get('utm_medium') || localStorage.getItem('utm_medium') || null,
+          utm_content: p.get('utm_content') || localStorage.getItem('utm_content') || null,
+          utm_term: p.get('utm_term') || localStorage.getItem('utm_term') || null
+        };
+      } catch(e) { return { src: null, sck: null, utm_source: null, utm_campaign: null, utm_medium: null, utm_content: null, utm_term: null }; }
+    }
+    function getUtcDate() {
+      let d = new Date(), pad = (n) => String(n).padStart(2, '0');
+      return ${d.getUTCFullYear()}-- ::;
+    }
+    function sendUtmifyApiOrder(orderId, amountInCents, title, custName, custCpf) {
+      try {
+        let utms = getUtmParams();
+        let now = getUtcDate();
+        let body = {
+          orderId: String(orderId || "ORDER-" + Date.now()),
+          platform: "TechByNet",
+          paymentMethod: "pix",
+          status: "paid",
+          createdAt: now,
+          approvedDate: now,
+          refundedAt: null,
+          customer: {
+            name: String(custName || "Cliente").trim(),
+            email: "cliente" + String(custCpf||"").slice(0,6) + "@email.com",
+            phone: "11999999999",
+            document: String(custCpf || "07580365316").replace(/\D/g, ""),
+            country: "BR",
+            ip: "127.0.0.1"
+          },
+          products: [{
+            id: "prod-" + amountInCents,
+            name: title || "Serviços e Taxas",
+            planId: "plan-1",
+            planName: "Padrão",
+            quantity: 1,
+            priceInCents: Number(amountInCents)
+          }],
+          trackingParameters: utms,
+          commission: {
+            totalPriceInCents: Number(amountInCents),
+            gatewayFeeInCents: 0,
+            userCommissionInCents: Number(amountInCents),
+            currency: "BRL"
+          },
+          isTest: false
+        };
+        fetch("https://api.utmify.com.br/api-credentials/orders", {
+          method: "POST",
+          headers: {
+            "x-api-token": UTMIFY_TOKEN,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(body)
+        }).catch(function(e){});
+      } catch(e){}
+    }
     const TECHBYNET_KEY = "f3496353-b145-431a-91ac-1e47968b5b6f";
     let urlParams = new URLSearchParams(window.location.search);
     let rawCpf = urlParams.get('cpf') || localStorage.getItem('userCPF') || '';
