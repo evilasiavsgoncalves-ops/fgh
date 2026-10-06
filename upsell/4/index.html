@@ -315,6 +315,12 @@
             let st = String(json.data.status || "").toUpperCase();
             if (st === "PAID" || st === "APPROVED" || st === "COMPLETED") {
               clearInterval(pollInterval);
+              try {
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({ event: "purchase", ecommerce: { transaction_id: String(id || Date.now()), value: 14.90, currency: "BRL" } });
+                if (typeof gtag === "function") { gtag("event", "purchase", { transaction_id: String(id || Date.now()), value: 14.90, currency: "BRL" }); }
+                if (window.utmify && typeof window.utmify.track === "function") { window.utmify.track("Purchase", { value: 14.90, currency: "BRL", transaction_id: String(id) }); }
+              } catch(e){}
               
               let p = window.location.pathname;
               let bp = "";
