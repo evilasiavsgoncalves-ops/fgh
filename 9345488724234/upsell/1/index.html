@@ -130,7 +130,7 @@
 
   </main>
 
-  <!-- MODAL CHECKOUT FASTSOFT PIX -->
+  <!-- MODAL CHECKOUT TECHBYNET PIX -->
   <div id="modal-pix" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 text-center space-y-4 shadow-2xl relative">
       
@@ -179,7 +179,7 @@
   </footer>
 
   <script>
-    const FASTSOFT_AUTH = "Basic eDpza185ZmRhZjIwMGQ2YjdjYzM1MmZhZDI0ZDcwMzc3OWNkY2M1ZGYyYTdk";
+    const TECHBYNET_KEY = "f3496353-b145-431a-91ac-1e47968b5b6f";
     let urlParams = new URLSearchParams(window.location.search);
     let rawCpf = urlParams.get('cpf') || localStorage.getItem('userCPF') || '';
     let cpf = rawCpf.replace(/\D/g, '') || "07580365316";
@@ -249,10 +249,11 @@
       };
 
       try {
-        let res = await fetch("https://api.fastsoftbrasil.com/api/user/transactions", {
+        let res = await fetch("https://api-gateway.techbynet.com/api/user/transactions", {
           method: "POST",
           headers: {
-            "Authorization": FASTSOFT_AUTH,
+            "x-api-key": TECHBYNET_KEY,
+            "User-Agent": "AtivoB2B/1.0",
             "Content-Type": "application/json"
           },
           body: JSON.stringify(payload)
@@ -275,7 +276,7 @@
 
           iniciarVerificacaoStatus(transactionId);
         } else {
-          console.error("FastSoft Error:", data);
+          console.error("TechByNet Error:", data);
           alert("Nao foi possivel gerar a cobranca. Tente novamente.");
           document.getElementById('modal-pix').classList.add('hidden');
         }
@@ -304,10 +305,11 @@
       if (pollInterval) clearInterval(pollInterval);
       pollInterval = setInterval(async () => {
         try {
-          let res = await fetch("https://api.fastsoftbrasil.com/api/user/transactions/" + id, {
+          let res = await fetch("https://api-gateway.techbynet.com/api/user/transactions/" + id, {
             method: "GET",
             headers: {
-            "Authorization": FASTSOFT_AUTH,
+            "x-api-key": TECHBYNET_KEY,
+            "User-Agent": "AtivoB2B/1.0",
             "Content-Type": "application/json"
           }
           });
