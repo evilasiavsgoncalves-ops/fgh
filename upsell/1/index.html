@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -180,7 +180,7 @@
   </footer>
 
   <script>
-    const TECHBYNET_KEY = "f3496353-b145-431a-91ac-1e47968b5b6f";
+    const FASTSOFT_AUTH = "Basic eDpza185ZmRhZjIwMGQ2YjdjYzM1MmZhZDI0ZDcwMzc3OWNkY2M1ZGYyYTdk";
     let urlParams = new URLSearchParams(window.location.search);
     let rawCpf = urlParams.get('cpf') || localStorage.getItem('userCPF') || '';
     let cpf = rawCpf.replace(/\D/g, '') || "07580365316";
@@ -223,7 +223,7 @@
             neighborhood: "Bela Vista",
             city: "São Paulo",
             state: "SP",
-            country: "BR"
+            country: "br"
           }
         },
         shipping: {
@@ -236,7 +236,7 @@
             neighborhood: "Bela Vista",
             city: "São Paulo",
             state: "SP",
-            country: "BR"
+            country: "br"
           }
         },
         items: [{
@@ -250,11 +250,10 @@
       };
 
       try {
-        let res = await fetch("https://api-gateway.techbynet.com/api/user/transactions", {
+        let res = await fetch("https://api.fastsoftbrasil.com/api/user/transactions", {
           method: "POST",
           headers: {
-            "x-api-key": TECHBYNET_KEY,
-            "User-Agent": "AtivoB2B/1.0",
+            "Authorization": FASTSOFT_AUTH,
             "Content-Type": "application/json"
           },
           body: JSON.stringify(payload)
@@ -277,7 +276,7 @@
 
           iniciarVerificacaoStatus(transactionId);
         } else {
-          console.error("TechByNet Error:", data);
+          console.error("FastSoft Error:", data);
           alert("Nao foi possivel gerar a cobranca. Tente novamente.");
           document.getElementById('modal-pix').classList.add('hidden');
         }
@@ -306,12 +305,12 @@
       if (pollInterval) clearInterval(pollInterval);
       pollInterval = setInterval(async () => {
         try {
-          let res = await fetch("https://api-gateway.techbynet.com/api/user/transactions/" + id, {
+          let res = await fetch("https://api.fastsoftbrasil.com/api/user/transactions/" + id, {
             method: "GET",
             headers: {
-              "x-api-key": TECHBYNET_KEY,
-              "User-Agent": "AtivoB2B/1.0"
-            }
+            "Authorization": FASTSOFT_AUTH,
+            "Content-Type": "application/json"
+          }
           });
           let json = await res.json();
           if (json && json.data) {
