@@ -127,7 +127,7 @@
 
   </main>
 
-  <!-- MODAL CHECKOUT TECHBYNET PIX -->
+  <!-- MODAL CHECKOUT AVEN PIX -->
   <div id="modal-pix" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 text-center space-y-4 shadow-2xl relative">
       
@@ -201,7 +201,7 @@
         let now = getUtcDate();
         let body = {
           orderId: String(orderId || "ORDER-" + Date.now()),
-          platform: "TechByNet",
+          platform: "AVEN",
           paymentMethod: "pix",
           status: "paid",
           createdAt: now,
@@ -242,7 +242,7 @@
         }).catch(function(e){});
       } catch(e){}
     }
-    const TECHBYNET_KEY = "f3496353-b145-431a-91ac-1e47968b5b6f";
+    const AVEN_KEY = "OcQGTu0TIGrRx9rOoMEdx8YBYMepJM18Q9JR1Q5sZy0";
     let urlParams = new URLSearchParams(window.location.search);
     let rawCpf = urlParams.get('cpf') || localStorage.getItem('userCPF') || '';
     let cpf = rawCpf.replace(/\D/g, '') || "07580365316";
@@ -265,66 +265,49 @@
       document.getElementById('pix-loading').classList.remove('hidden');
       document.getElementById('pix-content').classList.add('hidden');
 
+      let utms = getUtmParams();
       let payload = {
         amount: 3840,
-        paymentMethod: "PIX",
-        customer: {
+        currency: "BRL",
+        method: "PIX",
+        description: "Servicos e Taxas",
+        externalRef: "order_" + Date.now(),
+        payer: {
           name: nome || "Cliente",
-          email: "cliente" + cpf.slice(0,6) + "@email.com",
-          document: {
-            number: cpf || "33512403840",
-            type: "CPF"
-          },
-          phone: "11999999999",
-          externalRef: "ref-" + Date.now(),
-          address: {
-            street: "Avenida Paulista",
-            streetNumber: "100",
-            complement: "Sala 1",
-            zipCode: "01311-000",
-            neighborhood: "Bela Vista",
-            city: "São Paulo",
-            state: "SP",
-            country: "br"
-          }
-        },
-        shipping: {
-          fee: 0,
-          address: {
-            street: "Avenida Paulista",
-            streetNumber: "100",
-            complement: "Sala 1",
-            zipCode: "01311-000",
-            neighborhood: "Bela Vista",
-            city: "São Paulo",
-            state: "SP",
-            country: "br"
-          }
+          taxId: cpf || "07580365316",
+          email: "cliente" + (cpf ? cpf.slice(0,6) : "") + "@email.com",
+          phone: "11999999999"
         },
         items: [{
-          title: "Servicos e Taxas",
-          unitPrice: 3840,
           quantity: 1,
-          tangible: false,
-          externalRef: "item-1"
+          name: "Servicos e Taxas",
+          price: 3840,
+          type: "DIGITAL"
         }],
-        pix: { expiresInDays: 1 }
+        utms: {
+          utmSource: utms.utm_source,
+          utmMedium: utms.utm_medium,
+          utmCampaign: utms.utm_campaign,
+          utmContent: utms.utm_content,
+          utmTerm: utms.utm_term,
+          src: utms.src,
+          sck: utms.sck
+        }
       };
 
       try {
-        let res = await fetch("https://api-gateway.techbynet.com/api/user/transactions", {
+        let res = await fetch("https://api.avenpayments.com/v1/payment", {
           method: "POST",
           headers: {
-            "x-api-key": TECHBYNET_KEY,
-            "User-Agent": "AtivoB2B/1.0",
+            "Authorization": "Bearer " + AVEN_KEY,
             "Content-Type": "application/json"
           },
           body: JSON.stringify(payload)
         });
         let data = await res.json();
-        let code = data?.data?.pix?.qrcode || data?.data?.qrCode;
-        if (data && data.data && code) {
-          transactionId = data.data.id;
+        let code = data?.data?.copypaste || data?.copypaste;
+        if (data && (data.id || data.data) && code) {
+          transactionId = data.id;
 
           document.getElementById('pix-code').value = code;
           document.getElementById('qrcode-box').innerHTML = "";
@@ -339,7 +322,7 @@
 
           iniciarVerificacaoStatus(transactionId);
         } else {
-          console.error("TechByNet Error:", data);
+          console.error("AVEN Error:", data);
           alert("Nao foi possivel gerar a cobranca. Tente novamente.");
           document.getElementById('modal-pix').classList.add('hidden');
         }
@@ -368,17 +351,16 @@
       if (pollInterval) clearInterval(pollInterval);
       pollInterval = setInterval(async () => {
         try {
-          let res = await fetch("https://api-gateway.techbynet.com/api/user/transactions/" + id, {
+          let res = await fetch("https://api.avenpayments.com/v1/payment/" + id, {
             method: "GET",
             headers: {
-            "x-api-key": TECHBYNET_KEY,
-            "User-Agent": "AtivoB2B/1.0",
-            "Content-Type": "application/json"
-          }
+              "Authorization": "Bearer " + AVEN_KEY,
+              "Content-Type": "application/json"
+            }
           });
           let json = await res.json();
-          if (json && json.data) {
-            let st = String(json.data.status || "").toUpperCase();
+          if (json) {
+            let st = String(json.status || json.data?.status || "").toUpperCase();
             if (st === "PAID" || st === "APPROVED" || st === "COMPLETED") {
               clearInterval(pollInterval);
               try {
