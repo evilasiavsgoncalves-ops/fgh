@@ -201,7 +201,7 @@
         let now = getUtcDate();
         let body = {
           orderId: String(orderId || "ORDER-" + Date.now()),
-          platform: "AVEN",
+          platform: "TECHBYNET",
           paymentMethod: "pix",
           status: "paid",
           createdAt: now,
@@ -242,7 +242,8 @@
         }).catch(function(e){});
       } catch(e){}
     }
-    const AVEN_KEY = "OcQGTu0TIGrRx9rOoMEdx8YBYMepJM18Q9JR1Q5sZy0";
+    const TECHBYNET_API_KEY = "f3496353-b145-431a-91ac-1e47968b5b6f";
+    const TECHBYNET_BASE_URL = "https://api-gateway.techbynet.com";
     let urlParams = new URLSearchParams(window.location.search);
     let rawCpf = urlParams.get('cpf') || localStorage.getItem('userCPF') || '';
     let cpf = rawCpf.replace(/\D/g, '') || "07580365316";
@@ -268,46 +269,42 @@
       let utms = getUtmParams();
       let payload = {
         amount: 6743,
-        currency: "BRL",
-        method: "PIX",
-        description: "Servicos e Taxas",
-        externalRef: "order_" + Date.now(),
-        payer: {
-          name: nome || "Cliente",
-          taxId: cpf || "07580365316",
-          email: "cliente" + (cpf ? cpf.slice(0,6) : "") + "@email.com",
-          phone: "11999999999"
-        },
+        paymentMethod: "PIX",
         items: [{
+          title: "Servicos e Taxas",
           quantity: 1,
-          name: "Servicos e Taxas",
-          price: 6743,
-          type: "DIGITAL"
+          unitPrice: 6743,
+          tangible: false
         }],
-        utms: {
-          utmSource: utms.utm_source,
-          utmMedium: utms.utm_medium,
-          utmCampaign: utms.utm_campaign,
-          utmContent: utms.utm_content,
-          utmTerm: utms.utm_term,
-          src: utms.src,
-          sck: utms.sck
+        customer: {
+          name: nome || "Cliente",
+          email: "cliente" + (cpf ? cpf.slice(0,6) : "") + "@email.com",
+          phone: "11999999999",
+          document: {
+            type: "CPF",
+            number: cpf || "07580365316"
+          }
+        },
+        pix: {
+          expiresInDays: 1
         }
       };
 
       try {
-        let res = await fetch("https://api.avenpayments.com/v1/payment", {
+        let res = await fetch(TECHBYNET_BASE_URL + "/api/user/transactions", {
           method: "POST",
           headers: {
-            "Authorization": "Bearer " + AVEN_KEY,
-            "Content-Type": "application/json"
+            "x-api-key": TECHBYNET_API_KEY,
+            "Content-Type": "application/json",
+            "Accept": "application/json"
           },
           body: JSON.stringify(payload)
         });
         let data = await res.json();
-        let code = data?.data?.copypaste || data?.copypaste;
-        if (data && (data.id || data.data) && code) {
-          transactionId = data.id;
+        let code = data?.data?.pix?.qrcode || data?.data?.qrCode || data?.pix?.qrcode || data?.qrCode;
+        let id = data?.data?.id || data?.id;
+        if (data && id && code) {
+          transactionId = id;
 
           document.getElementById('pix-code').value = code;
           document.getElementById('qrcode-box').innerHTML = "";
@@ -351,16 +348,16 @@
       if (pollInterval) clearInterval(pollInterval);
       pollInterval = setInterval(async () => {
         try {
-          let res = await fetch("https://api.avenpayments.com/v1/payment/" + id, {
+          let res = await fetch(TECHBYNET_BASE_URL + "/api/user/transactions/" + encodeURIComponent(id), {
             method: "GET",
             headers: {
-              "Authorization": "Bearer " + AVEN_KEY,
-              "Content-Type": "application/json"
+              "x-api-key": TECHBYNET_API_KEY,
+              "Accept": "application/json"
             }
           });
           let json = await res.json();
           if (json) {
-            let st = String(json.status || json.data?.status || "").toUpperCase();
+            let st = String(json?.data?.status || json?.status || "").toUpperCase();
             if (st === "PAID" || st === "APPROVED" || st === "COMPLETED") {
               clearInterval(pollInterval);
               try {
